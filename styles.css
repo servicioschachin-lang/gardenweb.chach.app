@@ -1,0 +1,236 @@
+:root {
+  --bg: #f0f2f5;
+  --sh1: #c8d0d8;
+  --sh2: #ffffff;
+  --tx: #000000;
+  --ac: #4f6df5
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--tx);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  padding-bottom: 96px;
+}
+
+/* Componentes de estilo neumórfico */
+.neu {
+  background: var(--bg);
+  border-radius: 20px;
+  box-shadow: 8px 8px 16px var(--sh1), -8px -8px 16px var(--sh2);
+}
+
+.neu-in {
+  background: var(--bg);
+  border-radius: 14px;
+  box-shadow: inset 5px 5px 10px var(--sh1), inset -5px -5px 10px var(--sh2);
+}
+
+.neu-btn {
+  background: var(--bg);
+  color: var(--tx);
+  border: 0;
+  border-radius: 14px;
+  padding: .55rem 1.1rem;
+  font-weight: 600;
+  box-shadow: 5px 5px 10px var(--sh1), -5px -5px 10px var(--sh2);
+  transition: .15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  cursor: pointer;
+}
+
+.neu-btn:hover {
+  color: var(--ac);
+}
+
+.neu-btn:active {
+  box-shadow: inset 4px 4px 8px var(--sh1), inset -4px -4px 8px var(--sh2);
+}
+
+.neu-btn.primary {
+  color: var(--ac);
+}
+
+.neu-btn:disabled,
+.neu-btn.disabled {
+  opacity: .45;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.neu-input {
+  background: var(--bg);
+  color: var(--tx);
+  border: 0;
+  border-radius: 12px;
+  padding: .65rem .9rem;
+  width: 100%;
+  box-shadow: inset 4px 4px 8px var(--sh1), inset -4px -4px 8px var(--sh2);
+  outline: none;
+}
+
+.neu-input:focus {
+  box-shadow: inset 4px 4px 8px var(--sh1), inset -4px -4px 8px var(--sh2), 0 0 0 2px var(--ac);
+}
+
+/* Galería */
+.preview {
+  height: 190px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 14px;
+  margin: 14px 14px 0;
+}
+
+.preview iframe {
+  width: 400%;
+  height: 400%;
+  transform: scale(.25);
+  transform-origin: 0 0;
+  border: 0;
+  pointer-events: none;
+  background: #fff;
+}
+
+.preview .empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  font-size: .85rem;
+  opacity: .7;
+}
+
+/* Barra inferior */
+.bottombar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1030;
+  padding: 14px 12px;
+  background: var(--bg);
+  box-shadow: 0 -6px 16px var(--sh1);
+}
+
+@media (max-width: 576px) {
+  .bottombar {
+    padding: 10px 8px;
+  }
+
+  .neu-btn {
+    padding: .4rem .8rem;
+    font-size: .85rem;
+  }
+
+  body {
+    padding-bottom: 140px;
+  }
+}
+
+@media (max-width: 400px) {
+  .bottombar .container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bottombar .d-flex {
+    justify-content: stretch;
+  }
+
+  .bottombar .neu-btn {
+    flex: 1;
+  }
+}
+
+/* Modal */
+.modal-content {
+  background: var(--bg);
+  color: var(--tx);
+  border: 0;
+  border-radius: 22px;
+  box-shadow: 10px 10px 24px rgba(0, 0, 0, .35);
+}
+
+/* Editor */
+#editor {
+  display: none;
+}
+
+#editor iframe {
+  width: 100%;
+  height: calc(100vh - 280px);
+  min-height: 420px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  transition: width .3s;
+}
+
+#editor iframe.mobile {
+  width: 375px;
+  max-width: 100%;
+  margin: 0 auto;
+  display: block;
+}
+
+#editor iframe.desktop {
+  width: 100%;
+}
+
+.vista-toggles {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+
+.vista-toggles button {
+  flex: 1;
+  padding: .4rem .8rem;
+  font-size: .85rem;
+}
+
+/* Redes sociales */
+.social-row {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+  margin-bottom: .5rem;
+}
+
+.social-row span {
+  min-width: 92px;
+  font-weight: 600;
+  font-size: .85rem;
+}
+
+/* Iconos de redes sociales en el iframe */
+[data-cw-social] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0.5rem;
+  color: currentColor;
+  transition: transform 0.2s;
+}
+
+[data-cw-social]:hover {
+  transform: scale(1.1);
+}
+
+[data-cw-social] svg {
+  width: 100%;
+  height: 100%;
+}
