@@ -51,7 +51,6 @@ export class Editor {
     applyIconEditing(this);
     applyPageEditing(this);
   }
-
   async loadTemplate(template) {
     try {
       const r = await fetch(template.url);
@@ -90,6 +89,7 @@ export class Editor {
     this.setupNavbarButton();
     this.setupIconButton();
     this.setupPageButton();
+    this.setupAddSocial();
     window.scrollTo({ top: 0 });
   }
 
@@ -125,7 +125,6 @@ export class Editor {
     if (btnUndo) btnUndo.onclick = () => this.undo();
     if (btnRedo) btnRedo.onclick = () => this.redo();
   }
-
   getHTML() {
     const doc = $('#frame').contentDocument;
     if (!doc) return this.estado.html;
@@ -191,29 +190,9 @@ export class Editor {
       el.removeAttribute('data-cw-btn-grad-inicio');
       el.removeAttribute('data-cw-btn-grad-fin');
     });
-    const btnBg = $('#colorBotones') ? $('#colorBotones').value : '';
-    const btnTxt = $('#colorTextoBotones') ? $('#colorTextoBotones').value : '';
-    const btnGradI = $('#colorBotonesGradInicio') ? $('#colorBotonesGradInicio').value : '';
-    const btnGradF = $('#colorBotonesGradFin') ? $('#colorBotonesGradFin').value : '';
-    const btnGradDir = $('#dirBotonesGrad') ? $('#dirBotonesGrad').value : 'to right';
-    const btnCss = [];
-    if (btnGradI && btnGradF && btnGradI !== btnGradF) {
-      btnCss.push('background-image:linear-gradient(' + btnGradDir + ', ' + btnGradI + ', ' + btnGradF + ')!important');
-      btnCss.push('background-color:' + btnGradI + '!important');
-    } else if (btnBg && btnBg !== '#3b3409') {
-      btnCss.push('background-image:none!important;background-color:' + btnBg + '!important');
-    }
-    if (btnTxt && btnTxt !== '#000000') {
-      btnCss.push('color:' + btnTxt + '!important');
-    }
-    if (btnCss.length > 0) {
-      const st = clon.querySelector('style[data-cw-btn]') || clon.querySelector('style') || clon.head.appendChild(clon.createElement('style'));
-      st.setAttribute('data-cw-btn', '1');
-      st.textContent = (st.textContent || '') + 'button,[role="button"],.btn,.cta,a.btn,a.cta,a.neu-btn{' + btnCss.join(' ') + '}';
-    }
+    clon.querySelectorAll('[data-cw-social-name]').forEach(n => n.removeAttribute('data-cw-social-name'));
     return '<!DOCTYPE html>\n' + clon.outerHTML;
   }
-
   saveToStorage() {
     if (!this.estado) return;
     this.estado.html = this.getHTML();
@@ -240,5 +219,3 @@ export class Editor {
     return this.estado;
   }
 }
-
-

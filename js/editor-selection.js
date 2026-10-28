@@ -1,4 +1,4 @@
-/* Selección de elemento y barra de herramientas flotante */
+﻿/* SelecciÃ³n de elemento y barra de herramientas flotante */
 import { $ } from './utils.js';
 import { ElementToolbar } from './element-toolbar.js';
 
@@ -9,6 +9,9 @@ export function applyElementSelection(editor) {
     if (this.toolbar) this.toolbar.hide();
     this.elementoSeleccionado = el;
     el.style.outline = '3px solid #4f6df5';
+
+    // Sincronizar inputs de color de boton con el elemento seleccionado (aislado)
+    if (editor.syncButtonInputs) editor.syncButtonInputs(el);
 
     this.toolbar = new ElementToolbar(doc, {
       onEdit: (target) => {
@@ -30,7 +33,7 @@ export function applyElementSelection(editor) {
         const tieneTextoEditable = target.querySelector('[data-cw-edit]') !== null;
         const esContenedorHero = target.classList && target.classList.contains('hero');
         if (tieneTextoEditable || esContenedorHero) {
-          if (!confirm('Este elemento contiene texto u otros contenidos. ¿Estás seguro de que quieres borrarlo todo?')) {
+          if (!confirm('Este elemento contiene texto u otros contenidos. Â¿EstÃ¡s seguro de que quieres borrarlo todo?')) {
             return;
           }
         }
@@ -73,7 +76,7 @@ export function applyElementSelection(editor) {
         $('#edEstado').textContent = 'Cambios sin guardar';
         this.schedulePush();
         if (this.onChange) this.onChange();
-      }
+      },
     });
     this.toolbar.show(el);
   };

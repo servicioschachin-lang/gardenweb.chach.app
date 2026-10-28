@@ -1,9 +1,9 @@
 /* Configuración de la aplicación */
 export const CONFIG = {
   CREAWEB_URL: 'https://web.chach.app',
-  FORMSPREE: 'https://formspree.io/f/xqppqrpl',
-  DOMINIOS: ['empresagt.com', 'chach.app', 'chachin.dev'],
-  DOMINIO_DEFAULT: 'empresagt.com',
+  WHATSAPP_SUPPORT: '50232533214', // Cambiar por el número de WhatsApp de soporte
+  DOMINIO_DEFAULT:'empresagt.com',
+  DOMINIO:['empresagt.com','chach.app','chachin.dev'],
   LIMITE_HTML: 900000,
   STORE_KEY: 'creaweb_estado_v1',
   RESERVADOS: ['www', 'admin', 'mail', 'correo', 'ftp', 'api', 'app', 'panel', 'creaweb', 'soporte', 'ayuda', 'test'],

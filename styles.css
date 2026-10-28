@@ -315,6 +315,18 @@ body {
 .cw-color-pop input[type="color"] { width: 36px; height: 28px; border: 0; padding: 0; cursor: pointer; }
 
 
+/* Informe de publicación */
+#pubInforme .bg-success {
+  background: #198754 !important;
+}
+#pubInforme ol li {
+  margin-bottom: .75rem;
+}
+#pubInforme .small.fw-semibold {
+  color: var(--tx) !important;
+  opacity: 1;
+}
+
 /* Botones superiores del editor más definidos */
 .editor-actions {
   align-items: center;

@@ -1,6 +1,28 @@
-/* Iconos y renderizado de enlaces sociales */
+﻿/* Iconos y renderizado de enlaces sociales */
 import { $ } from './utils.js';
 import { SOCIAL_PATTERNS, SOCIAL_NAMES } from './config.js';
+
+export const SOCIAL_LABEL = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  whatsapp: 'WhatsApp',
+  twitter: 'Twitter',
+  youtube: 'YouTube',
+  linkedin: 'LinkedIn',
+  telegram: 'Telegram'
+};
+
+const NOMBRES_EXACTOS = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  whatsapp: 'WhatsApp',
+  twitter: 'Twitter',
+  youtube: 'YouTube',
+  linkedin: 'LinkedIn',
+  telegram: 'Telegram'
+};
 
 export function applySocialIcons(editor) {
   editor.getSocialIcon = function(social) {
@@ -17,10 +39,73 @@ export function applySocialIcons(editor) {
     return icons[social] || `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>`;
   };
 
+  // Detecta si un elemento lleva el nombre exacto de una red social (coincidencia de palabra completa)
+  editor.detectSocialName = function(el) {
+    if (!el) return null;
+    const ya = el.getAttribute('data-cw-social-name');
+    if (ya) return ya;
+
+    const tag = el.tagName.toLowerCase();
+    if (['input', 'textarea', 'select', 'script', 'style', 'a'].includes(tag)) return null;
+
+    const texto = (el.textContent || '').trim();
+    if (!texto) return null;
+
+    const lower = texto.toLowerCase();
+    const limpio = lower.replace(/[^a-z0-9]/g, '');
+    if (NOMBRES_EXACTOS[limpio]) return NOMBRES_EXACTOS[limpio];
+
+    return null;
+  };
+
+  // Convierte un elemento (boton/div/etc.) con nombre de red en un <a> editable,
+  // o marca un <a> existente como enlace social.
+  editor.prepareSocialElement = function(el, nombre) {
+    const doc = el.ownerDocument;
+    const tag = el.tagName.toLowerCase();
+    if (tag === 'a') {
+      el.setAttribute('data-cw-social-name', nombre);
+      if (!el.getAttribute('href')) el.setAttribute('href', '');
+      el.setAttribute('target', '_blank');
+      el.setAttribute('rel', 'noopener');
+      return el;
+    }
+    const a = doc.createElement('a');
+    a.setAttribute('href', '');
+    a.setAttribute('data-cw-social-name', nombre);
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+    if (el.className) a.className = el.className;
+    if (el.style.cssText) a.style.cssText = el.style.cssText;
+    a.textContent = el.textContent;
+    ['id', 'title', 'aria-label'].forEach(attr => {
+      const v = el.getAttribute(attr);
+      if (v) a.setAttribute(attr, v);
+    });
+    el.replaceWith(a);
+    return a;
+  };
+
   editor.renderSocialLinks = function(doc) {
+    // 1. Detectar y convertir elementos con nombre de red social (botones, cuadros, etc.)
+    const candidatos = doc.querySelectorAll('button, div, span, p, li');
+    candidatos.forEach(el => {
+      const nombre = editor.detectSocialName(el);
+      if (nombre) editor.prepareSocialElement(el, nombre);
+    });
+
+    // 2. Buscar enlaces sociales (incluye los recien convertidos y los <a href="#"> con nombre)
     const links = [...doc.querySelectorAll('a[href]')].filter(a => {
       const href = a.getAttribute('href');
       if (SOCIAL_PATTERNS.test(href)) return true;
+      if (a.getAttribute('data-cw-social-name')) return true;
+      // Detectar <a href="#">Facebook</a> por texto exacto
+      const texto = (a.textContent || '').trim();
+      if (texto) {
+        const lower = texto.toLowerCase();
+        const limpio = lower.replace(/[^a-z0-9]/g, '');
+        if (NOMBRES_EXACTOS[limpio]) return true;
+      }
       const aria = a.getAttribute('aria-label');
       if (aria) {
         const nombre = (SOCIAL_NAMES.find(([r]) => r.test(aria)) || [0, ''])[1];
@@ -40,12 +125,13 @@ export function applySocialIcons(editor) {
       }
       return false;
     });
+
     const box = $('#socialBox');
     const list = $('#socialList');
     list.innerHTML = '';
 
     if (!links.length) {
-      box.style.display = 'none';
+      box.style.display = 'block';
       return;
     }
 
@@ -54,10 +140,20 @@ export function applySocialIcons(editor) {
     const socialMap = new Map();
     links.forEach(a => {
       const href = a.getAttribute('href');
-      let nombre = '';
-      const aria = a.getAttribute('aria-label');
-      if (aria) {
-        nombre = (SOCIAL_NAMES.find(([r]) => r.test(aria)) || [0, ''])[1];
+      let nombre = a.getAttribute('data-cw-social-name');
+      if (!nombre) {
+        const texto = (a.textContent || '').trim();
+        if (texto) {
+          const lower = texto.toLowerCase();
+          const limpio = lower.replace(/[^a-z0-9]/g, '');
+          if (NOMBRES_EXACTOS[limpio]) nombre = NOMBRES_EXACTOS[limpio];
+        }
+      }
+      if (!nombre) {
+        const aria = a.getAttribute('aria-label');
+        if (aria) {
+          nombre = (SOCIAL_NAMES.find(([r]) => r.test(aria)) || [0, ''])[1];
+        }
       }
       if (!nombre) {
         const icon = a.querySelector('i');
@@ -86,7 +182,7 @@ export function applySocialIcons(editor) {
       const inp = document.createElement('input');
       inp.className = 'neu-input';
       inp.type = 'url';
-      inp.placeholder = 'https://…';
+      inp.placeholder = 'https://...';
       inp.value = items[0].href;
       inp.addEventListener('input', () => {
         items.forEach(item => {

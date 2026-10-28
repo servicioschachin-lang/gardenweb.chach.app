@@ -12,14 +12,13 @@ export class FormHandler {
     this.loadDominios();
     this.attachEvents();
     this.attachModalEvents();
-    this.setupFormspree();
   }
 
   loadDominios() {
     const select = $('#fDominio');
     if (!select) return;
     select.innerHTML = '';
-    CONFIG.DOMINIOS.forEach(dominio => {
+    CONFIG.DOMINIO.forEach(dominio => {
       const option = document.createElement('option');
       option.value = dominio;
       option.textContent = dominio;
@@ -55,17 +54,30 @@ export class FormHandler {
       $('#fPlantilla').value = estado.nombre;
       $('#pubErr').style.display = 'none';
       $('#pubOk').style.display = 'none';
+      $('#pubInforme').style.display = 'none';
       $('#pubCampos').style.display = 'block';
       $('#btnEnviar').style.display = '';
+      $('#btnDescargarHtml').style.display = '';
       this.modal.show();
     });
 
-    $('#btnEnviar').addEventListener('click', async () => {
-      await this.handleSubmit();
+    $('#formPublicar').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await this.handleSubmit(e);
     });
+
+    $('#btnDescargarHtml').addEventListener('click', () => {
+      const estado = this.editor.getEstado();
+      if (!estado) return;
+      const html = this.editor.getHTML();
+      const sub = cleanSubdomain($('#fSub').value) || 'miweb';
+      downloadFile(html, sub + '.html');
+    });
+
+    $('#btnNuevaPublicacion').addEventListener('click', () => this.reiniciarPublicacion());
   }
 
-  async handleSubmit() {
+  async handleSubmit(e) {
     const btn = $('#btnEnviar');
     const err = $('#pubErr');
     const sub = cleanSubdomain($('#fSub').value).replace(/-+$/, '');
@@ -83,44 +95,99 @@ export class FormHandler {
     btn.textContent = 'Preparando…';
 
     try {
-      // Sincronizar cambios actuales del iframe al estado antes de publicar,
-      // para que no se pierdan ediciones que aún no se guardaron con "Guardar cambios"
-      const htmlDelIframe = this.editor.getHTML();
-      if (htmlDelIframe && this.editor.getEstado()) {
-        this.editor.estado.html = htmlDelIframe;
-      }
       let html = this.editor.getHTML();
       if (html.length > CONFIG.LIMITE_HTML) {
         html = await this.compressImages(html);
       }
-      const muyPesado = html.length > CONFIG.LIMITE_HTML;
 
-      $('#fSubCompleto').value = sub + '.' + dominio;
-      $('#fPlantillaOrigen').value = this.editor.getEstado().url;
-      $('#fFecha').value = new Date().toLocaleString('es-GT');
-      $('#fTamano').value = String(Math.round(html.length / 1024));
-      $('#fSubject').value = 'Nueva web: ' + sub + '.' + dominio + ' · CreaWeb';
+      const negocio = $('#fNegocio').value || 'No especificado';
+      const nombre = $('#fNombre').value || 'No especificado';
+      const email = $('#fEmail').value || 'No especificado';
+      const whatsapp = $('#fWhats').value || 'No especificado';
+      const mensaje = $('#fMsg').value || 'Sin mensaje adicional';
+      const resumen = $('#fResumen').value || 'Sin resumen';
+      const nombrePlantilla = this.editor.getEstado().nombre;
+      const fecha = new Date().toLocaleString('es-GT');
+      const tamano = String(Math.round(html.length / 1024));
+      const subCompleto = `${sub}.${dominio}`;
 
-      if (muyPesado) {
-        $('#fHtmlFinal').value = '(HTML demasiado pesado - archivo descargado)';
-        downloadFile(html, sub + '.html');
-        btn.disabled = false;
-        btn.textContent = 'Enviar';
-        return;
-      }
+      // 1. Descargar automáticamente el HTML final
+      downloadFile(html, sub + '.html');
 
-      $('#fHtmlFinal').value = html;
+      // 2. Mensaje de WhatsApp: solo resumen limpio (sin HTML largo que se truncara)
+      const mensajeWhatsApp = `
+🌐 *SOLICITUD DE PUBLICACIÓN WEB*
 
-      btn.textContent = 'Enviando…';
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-      // Enviar el formulario directamente a Formspree (envío tradicional, evita CORS)
-      const form = $('#formPublicar');
-      form.submit();
+📋 *DATOS DEL NEGOCIO*
+• Negocio: ${negocio}
+• Subdominio: ${subCompleto}
+• Plantilla: ${nombrePlantilla}
+
+👤 *DATOS DE CONTACTO*
+• Nombre: ${nombre}
+• Email: ${email}
+• WhatsApp: ${whatsapp}
+
+📝 *RESUMEN*
+${resumen}
+
+💬 *MENSAJE ADICIONAL*
+${mensaje}
+
+📊 *TÉCNICO*
+• Fecha: ${fecha}
+• Tamaño HTML: ${tamano} KB
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+⬇️ El archivo HTML completo se descarga automáticamente al enviar.
+      `.trim();
+
+      // Codificar mensaje para URL
+      const mensajeCodificado = encodeURIComponent(mensajeWhatsApp);
+
+      // Abrir WhatsApp
+      const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_SUPPORT}?text=${mensajeCodificado}`;
+      window.open(whatsappUrl, '_blank');
+
+      // 3. Mostrar informe de pasos a tomar
+      this.mostrarInforme(subCompleto, negocio, fecha);
+
+      btn.disabled = false;
+      btn.textContent = 'Enviar';
     } catch (x) {
       mostrarErr('Error: ' + x.message);
       btn.disabled = false;
       btn.textContent = 'Enviar';
     }
+  }
+
+  mostrarInforme(subCompleto, negocio, fecha) {
+    $('#pubCampos').style.display = 'none';
+    $('#pubOk').style.display = 'none';
+    $('#btnEnviar').style.display = 'none';
+    $('#btnDescargarHtml').style.display = 'none';
+    $('#formPublicar').reset();
+
+    $('#informeSubdominio').textContent = subCompleto;
+    $('#informeNegocio').textContent = negocio ? `Negocio: ${negocio}` : '';
+    $('#informeUrl').textContent = `https://${subCompleto}`;
+    $('#informeFecha').textContent = `Fecha: ${fecha}`;
+
+    $('#pubInforme').style.display = 'block';
+  }
+
+  reiniciarPublicacion() {
+    $('#pubInforme').style.display = 'none';
+    $('#pubCampos').style.display = 'block';
+    $('#pubErr').style.display = 'none';
+    $('#btnEnviar').style.display = '';
+    $('#btnDescargarHtml').style.display = '';
+    $('#formPublicar').reset();
+    this.loadDominios();
+    this.updateSubVista();
   }
 
   async compressImages(html) {
@@ -145,11 +212,6 @@ export class FormHandler {
       }
     }
     return html;
-  }
-
-  setupFormspree() {
-    // El envío se hace con fetch() directamente en handleSubmit(),
-    // no es necesario inicializar formspree aquí.
   }
 
   setModal(modal) {
