@@ -9,17 +9,46 @@ export class FormHandler {
   }
 
   init() {
+    this.loadDominios();
     this.attachEvents();
+    this.attachModalEvents();
     this.setupFormspree();
+  }
+
+  loadDominios() {
+    const select = $('#fDominio');
+    if (!select) return;
+    select.innerHTML = '';
+    CONFIG.DOMINIOS.forEach(dominio => {
+      const option = document.createElement('option');
+      option.value = dominio;
+      option.textContent = dominio;
+      if (dominio === CONFIG.DOMINIO_DEFAULT) option.selected = true;
+      select.appendChild(option);
+    });
   }
 
   attachEvents() {
     $('#fSub').addEventListener('input', (e) => {
       const v = cleanSubdomain(e.target.value);
       e.target.value = v;
-      $('#subVista').textContent = (v || 'ejemplo') + '.' + CONFIG.DOMINIO;
+      this.updateSubVista();
     });
 
+    $('#fDominio').addEventListener('change', () => {
+      this.updateSubVista();
+    });
+
+    this.updateSubVista();
+  }
+
+  updateSubVista() {
+    const sub = cleanSubdomain($('#fSub').value) || 'ejemplo';
+    const dominio = $('#fDominio').value || CONFIG.DOMINIO_DEFAULT;
+    $('#subVista').textContent = sub + '.' + dominio;
+  }
+
+  attachModalEvents() {
     $('#btnPublicar').addEventListener('click', () => {
       const estado = this.editor.getEstado();
       if (!estado) return;
@@ -31,16 +60,16 @@ export class FormHandler {
       this.modal.show();
     });
 
-    $('#formPublicar').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await this.handleSubmit(e);
+    $('#btnEnviar').addEventListener('click', async () => {
+      await this.handleSubmit();
     });
   }
 
-  async handleSubmit(e) {
+  async handleSubmit() {
     const btn = $('#btnEnviar');
     const err = $('#pubErr');
     const sub = cleanSubdomain($('#fSub').value).replace(/-+$/, '');
+    const dominio = $('#fDominio').value || CONFIG.DOMINIO_DEFAULT;
     const mostrarErr = (m) => {
       err.textContent = m;
       err.style.display = 'block';
@@ -54,26 +83,39 @@ export class FormHandler {
     btn.textContent = 'Preparando…';
 
     try {
+      // Sincronizar cambios actuales del iframe al estado antes de publicar,
+      // para que no se pierdan ediciones que aún no se guardaron con "Guardar cambios"
+      const htmlDelIframe = this.editor.getHTML();
+      if (htmlDelIframe && this.editor.getEstado()) {
+        this.editor.estado.html = htmlDelIframe;
+      }
       let html = this.editor.getHTML();
       if (html.length > CONFIG.LIMITE_HTML) {
         html = await this.compressImages(html);
       }
       const muyPesado = html.length > CONFIG.LIMITE_HTML;
 
-      $('#fSubCompleto').value = sub + '.' + CONFIG.DOMINIO;
+      $('#fSubCompleto').value = sub + '.' + dominio;
       $('#fPlantillaOrigen').value = this.editor.getEstado().url;
       $('#fFecha').value = new Date().toLocaleString('es-GT');
       $('#fTamano').value = String(Math.round(html.length / 1024));
-      $('#fSubject').value = 'Nueva web: ' + sub + '.' + CONFIG.DOMINIO + ' · CreaWeb';
+      $('#fSubject').value = 'Nueva web: ' + sub + '.' + dominio + ' · CreaWeb';
 
       if (muyPesado) {
         $('#fHtmlFinal').value = '(HTML demasiado pesado - archivo descargado)';
         downloadFile(html, sub + '.html');
-      } else {
-        $('#fHtmlFinal').value = html;
+        btn.disabled = false;
+        btn.textContent = 'Enviar';
+        return;
       }
 
+      $('#fHtmlFinal').value = html;
+
       btn.textContent = 'Enviando…';
+
+      // Enviar el formulario directamente a Formspree (envío tradicional, evita CORS)
+      const form = $('#formPublicar');
+      form.submit();
     } catch (x) {
       mostrarErr('Error: ' + x.message);
       btn.disabled = false;
@@ -106,32 +148,8 @@ export class FormHandler {
   }
 
   setupFormspree() {
-    if (typeof formspree !== 'undefined') {
-      formspree('initForm', { formElement: '#formPublicar', formId: 'xrengvqb' });
-      formspree('onSubmit', () => {
-        const sub = $('#fSub').value.replace(/-+$/, '');
-        const muyPesado = $('#fHtmlFinal').value.includes('demasiado pesado');
-        if (muyPesado) {
-          $('#pubOkTxt').textContent = 'Recibimos tus datos. Tu HTML es muy pesado: se descargó el archivo. Envíanoslo por WhatsApp o correo.';
-        } else {
-          $('#pubOkTxt').textContent = 'Recibimos tus datos y tu HTML final. Tu web será ' + sub + '.' + CONFIG.DOMINIO + '. Te contactaremos pronto.';
-        }
-        $('#pubCampos').style.display = 'none';
-        $('#pubOk').style.display = 'block';
-        $('#btnEnviar').style.display = 'none';
-        $('#formPublicar').reset();
-        $('#subVista').textContent = 'ejemplo.' + CONFIG.DOMINIO;
-      });
-
-      formspree('onError', (event) => {
-        const err = $('#pubErr');
-        const messages = event.errors ? event.errors.map(e => e.message).join(', ') : 'No se pudo enviar. Intenta de nuevo.';
-        err.textContent = messages;
-        err.style.display = 'block';
-        $('#btnEnviar').disabled = false;
-        $('#btnEnviar').textContent = 'Enviar';
-      });
-    }
+    // El envío se hace con fetch() directamente en handleSubmit(),
+    // no es necesario inicializar formspree aquí.
   }
 
   setModal(modal) {

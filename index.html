@@ -1,308 +1,248 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Creaweb Chach App · Crea tu sitio web profesional en minutos</title>
-  <meta name="description" content="Crea tu sitio web profesional en minutos con Creaweb Chach App. Elige entre plantillas por rubro optimizadas para tu negocio o empieza un diseño a medida.">
-  <meta name="keywords" content="crear web, plantillas web, diseño web profesional, barberia, restaurante, negocios, creaweb chach">
-  <meta name="author" content="Creaweb Chach App">
-
-  <!-- Open Graph / Redes Sociales -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Creaweb Chach App">
-  <meta property="og:description" content="Crea tu sitio web profesional en minutos. Elige entre plantillas por rubro listas para personalizar.">
-  <meta property="og:image" content="logo-blanco.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="logo-blanco.png">
-
-  <!-- Hoja de estilos desacoplada (SRP) -->
-  <link rel="stylesheet" href="css/styles.css">
-
-  <!-- Tailwind CSS CDN (defer para no bloquear renderizado) -->
-  <script src="https://cdn.tailwindcss.com/3.4.17" defer></script>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://formspree.io https://unpkg.com https://cdn.jsdelivr.net; connect-src 'self' https://formspree.io https://formspree.io/cdn-cgi; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; font-src 'self' https: data:;">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
-<body class="blobs min-h-screen text-white flex flex-col">
+<body>
 
-  <!-- ENCABEZADO Y NAVEGACIÓN -->
-  <header>
-    <nav class="glass sticky top-0 z-30 rounded-none border-x-0 border-t-0" aria-label="Navegación principal">
-      <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-        <a href="#" class="flex items-center gap-3 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-lg p-1" id="brand">
-          <img src="logo-blanco.png" alt="Logo Creaweb Chach App" class="h-10 w-auto">
-          <span>Creaweb Chach App</span>
-        </a>
-        <div class="hidden sm:flex items-center text-sm">
-          <a class="nav-link" id="navHome" href="#inicio">Inicio</a>
-                    <button type="button" class="btn btn-outline !py-1.5 ml-2 text-sm" id="navContact">
-            <i data-i="mail"></i>Contacto
-          </button>
-        </div>
-        <button id="burger" type="button" class="sm:hidden btn btn-outline !p-2" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
-          <span id="burgerOpen"><i data-i="menu"></i></span>
-          <span id="burgerClose" class="hidden"><i data-i="x"></i></span>
-        </button>
+<!-- ============ GALERÍA ============ -->
+<main id="galeria" class="container py-4">
+  <header class="text-center mb-5 mt-3">
+    <h1 class="fw-bold text-3xl md:text-5xl">Elige tu plantilla para Jardineros</h1>
+    <p class="opacity-75 mt-2">Revisa la vista previa, pulsa <b>Ver</b> para abrirla completa o <b>Usar</b> para personalizarla a tu estilo.</p>
+    <div id="continuarBox" class="neu-in p-3 mt-4" style="display:none">
+      <p class="fw-semibold mb-2">📝 Tienes un progreso guardado</p>
+      <p class="small opacity-75 mb-3">Plantilla: <span id="continuarNombre"></span></p>
+      <div class="d-flex gap-2 justify-content-center">
+        <button id="btnContinuar" class="neu-btn primary">Continuar edición</button>
+        <button id="btnEmpezarNuevo" class="neu-btn">Empezar de nuevo</button>
       </div>
-
-      <!-- Menú Móvil Desplegable -->
-      <div id="mobileMenu" class="hidden sm:hidden border-t border-white/10 px-5 py-3 flex-col gap-1 text-base">
-        <a class="nav-link flex items-center gap-3 !py-3" id="mHome" href="#inicio"><i data-i="home"></i>Inicio</a>
-                <button type="button" class="btn btn-primary mt-2" id="mContact"><i data-i="mail"></i>Contacto</button>
-      </div>
-    </nav>
+    </div>
   </header>
+  <div id="grid" class="row g-4"></div>
+</main>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-5 py-12">
-
-    <!-- PASO 1: SELECCIÓN DE MODALIDAD -->
-    <section id="step1" class="fade" aria-labelledby="hero-title">
-      <div class="text-center max-w-3xl mx-auto">
-        <span class="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-sm text-cyan-200">
-          <i data-i="sparkles"></i>Crea tu sitio web en minutos
-        </span>
-        <h1 id="hero-title" class="mt-5 text-4xl md:text-6xl font-extrabold leading-tight">
-          Bienvenido a <span class="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Creaweb Chach App</span>
-        </h1>
-        <p class="mt-4 text-lg text-white/70">
-          Elige cómo quieres empezar. Puedes partir de una plantilla profesional o diseñar todo a tu manera.
-        </p>
+<!-- ============ EDITOR ============ -->
+<section id="editor" class="container-fluid py-3 px-3 px-md-4">
+  <div class="neu p-3 mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <h2 class="h5 m-0" id="edTitulo">Plantilla</h2>
+        <small class="opacity-75">Toca un texto para editarlo o una imagen para reemplazarla. <b>Shift + clic</b> en cualquier elemento para cambiar su color. El resto de la plantilla está bloqueado.</small>
       </div>
-
-      <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-12">
-        <!-- Tarjeta Opción 1: Plantillas -->
-        <article class="glass lift rounded-2xl overflow-hidden flex flex-col">
-          <div class="px-6 py-3 border-b border-white/10 flex items-center justify-between text-sm">
-            <span class="text-white/60">Opción 1</span>
-            <span class="bg-emerald-400/20 text-emerald-300 rounded-full px-3 py-0.5 text-xs font-semibold">Recomendado</span>
-          </div>
-          <div class="p-7 flex-1">
-            <div class="w-14 h-14 rounded-xl bg-[#0d6efd]/25 text-blue-300 grid place-items-center text-3xl mb-4">
-              <i data-i="layout"></i>
-            </div>
-            <h2 class="text-2xl font-bold">Usar una plantilla</h2>
-            <p class="mt-2 text-white/70">Elige tu rubro y selecciona un diseño listo para personalizar con tu marca.</p>
-          </div>
-          <div class="px-7 pb-7">
-            <button id="btnTpl" type="button" class="btn btn-primary w-full">
-              Elegir plantilla<i data-i="arrow-right"></i>
-            </button>
-          </div>
-        </article>
-
-        <!-- Tarjeta Opción 2: Desde 0 -->
-        <article class="glass lift rounded-2xl overflow-hidden flex flex-col">
-          <div class="px-6 py-3 border-b border-white/10 flex items-center justify-between text-sm">
-            <span class="text-white/60">Opción 2</span>
-            <span class="bg-cyan-400/20 text-cyan-300 rounded-full px-3 py-0.5 text-xs font-semibold">Personalizado</span>
-          </div>
-          <div class="p-7 flex-1">
-            <div class="w-14 h-14 rounded-xl bg-cyan-400/20 text-cyan-300 grid place-items-center text-3xl mb-4">
-              <i data-i="pen"></i>
-            </div>
-            <h2 class="text-2xl font-bold">Crear diseño propio desde 0</h2>
-            <p class="mt-2 text-white/70">Empieza con un lienzo en blanco y construye una web totalmente a tu medida.</p>
-          </div>
-          <div class="px-7 pb-7">
-            <button id="btnScratch" type="button" class="btn btn-info w-full">
-              Empezar desde cero<i data-i="arrow-right"></i>
-            </button>
-          </div>
-        </article>
+      <span id="edEstado" class="small opacity-75"></span>
+      <div class="d-flex gap-2">
+        <button id="btnCambiar" class="neu-btn" disabled style="padding:.4rem .8rem;font-size:.85rem">Cambiar plantilla</button>
+        <button id="btnGuardar" class="neu-btn" disabled style="padding:.4rem .8rem;font-size:.85rem">Guardar cambios</button>
+        <button id="btnPublicar" class="neu-btn primary" disabled style="padding:.4rem .8rem;font-size:.85rem">Publicar web</button>
       </div>
-
-      <!-- Ventajas Destacadas -->
-      <div class="grid sm:grid-cols-3 gap-4 max-w-4xl mx-auto mt-10 text-sm">
-        <div class="glass rounded-xl p-4 flex items-center gap-3">
-          <span class="text-blue-300 text-2xl"><i data-i="zap"></i></span>Rápido y fácil de usar
-        </div>
-        <div class="glass rounded-xl p-4 flex items-center gap-3">
-          <span class="text-blue-300 text-2xl"><i data-i="phone"></i></span>Diseño adaptable a móvil
-        </div>
-        <div class="glass rounded-xl p-4 flex items-center gap-3">
-          <span class="text-blue-300 text-2xl"><i data-i="shield"></i></span>Seguro y confiable
-        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-3 mt-3">
+      <div>
+        <label class="small fw-semibold mb-1">Color de fondo (body)</label>
+        <input type="color" id="colorFondo" class="neu-input" style="width:80px;height:40px;padding:2px;cursor:pointer" value="#ffffff">
       </div>
-    </section>
-
-    <!-- PASO 2: CATÁLOGO DE RUBROS -->
-    <section id="step2" class="hidden" aria-labelledby="catalog-title">
-      <nav class="text-sm mb-6 flex items-center gap-2 text-white/60" aria-label="Migas de pan">
-        <a href="#inicio" id="crumbHome" class="hover:text-white transition-colors">Inicio</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-white font-medium">Plantillas</span>
-      </nav>
-
-      <div class="max-w-2xl mb-8">
-        <h2 id="catalog-title" class="text-3xl md:text-4xl font-extrabold">Elige tu rubro</h2>
-        <p class="mt-2 text-white/70">Selecciona el tipo de negocio para ver las plantillas disponibles.</p>
-        <p class="mt-1 text-white/60">Catálogo con <span id="rubros-count">50</span> rubros disponibles. <span id="plantillas-count">500</span> plantillas listas para personalizar y usar.</p>
+      <div>
+        <label class="small fw-semibold mb-1">Color de texto (body)</label>
+        <input type="color" id="colorTexto" class="neu-input" style="width:80px;height:40px;padding:2px;cursor:pointer" value="#000000">
       </div>
-
-      <!-- Buscador -->
-      <div class="flex max-w-xl mb-8">
-        <span class="glass rounded-l-lg px-4 grid place-items-center border-r-0" aria-hidden="true">
-          <i data-i="search"></i>
-        </span>
-        <input id="search" type="search" placeholder="Buscar rubro (ej. restaurante, barbería, clínica...)" class="form-control !rounded-l-none" aria-label="Buscar rubro">
+      <div>
+        <label class="small fw-semibold mb-1">Fuente (body)</label>
+        <select id="fuenteBody" class="neu-input" style="width:150px;padding:.4rem .6rem;font-size:.85rem">
+          <option value="system-ui">system-ui (por defecto)</option>
+          <option value="Arial">Arial</option>
+          <option value="Helvetica">Helvetica</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Trebuchet MS">Trebuchet MS</option>
+          <option value="Comic Sans MS">Comic Sans MS</option>
+          <option value="Impact">Impact</option>
+          <option value="Open Sans">Open Sans</option>
+          <option value="Roboto">Roboto</option>
+          <option value="Lato">Lato</option>
+          <option value="Montserrat">Montserrat</option>
+          <option value="Playfair Display">Playfair Display</option>
+          <option value="Oswald">Oswald</option>
+          <option value="Source Sans Pro">Source Sans Pro</option>
+        </select>
       </div>
-
-      <!-- Grid de Tarjetas de Rubros -->
-      <div id="grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="region" aria-live="polite"></div>
-      
-      <!-- Mensaje cuando no hay resultados -->
-      <div id="empty" class="hidden text-center text-white/70 mt-6 py-8 glass rounded-2xl">
-        <p class="text-lg">No encontramos ese rubro en este momento.</p>
-        <p class="text-sm text-white/50 mt-1">Intenta con otro término o solicita tu diseño personalizado.</p>
+      <div>
+        <label class="small fw-semibold mb-1">Color de fondo (botones)</label>
+        <input type="color" id="colorBotones" class="neu-input" style="width:80px;height:40px;padding:2px;cursor:pointer" value="#3b3409">
       </div>
-
-      <!-- Call to Action Rubro Faltante -->
-      <div class="glass rounded-2xl mt-10 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-          <span class="w-12 h-12 rounded-xl bg-cyan-400/20 text-cyan-300 grid place-items-center text-2xl">
-            <i data-i="help"></i>
-          </span>
-          <div>
-            <div class="font-bold">¿No aparece tu rubro?</div>
-            <div class="text-sm text-white/70">Cuéntanos tu tipo de negocio y creamos una plantilla para ti.</div>
-          </div>
-        </div>
-        <button id="btnMissing" type="button" class="btn btn-primary">
-          <i data-i="mail"></i>Escríbenos
-        </button>
+      <div>
+        <label class="small fw-semibold mb-1">Color de texto (botones)</label>
+        <input type="color" id="colorTextoBotones" class="neu-input" style="width:80px;height:40px;padding:2px;cursor:pointer" value="#000000">
       </div>
-    </section>
-<!-- PASO 3: ONBOARDING CLIENTE -->
-    <section id="step3" class="hidden" aria-labelledby="onboarding-title">
-      <div class="max-w-2xl mx-auto py-12 text-center">
-        <span class="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-sm text-cyan-200">
-          <i data-i="sparkles"></i>Bienvenido al onboarding
-        </span>
-        <h2 id="onboarding-title" class="mt-6 text-3xl font-extrabold">Gracias por elegirnos</h2>
-        <p class="mt-4 text-white/70">Te guiaremos para configurar tu sitio web paso a paso. Selecciona tu rubro y personaliza las plantillas a tu gusto.</p>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8 max-w-xl mx-auto">
-          <div class="glass p-4 rounded-xl text-left">
-            <h3 class="font-bold text-cyan-300 mb-2">1. Header</h3>
-            <p class="text-white/60 text-sm">Menú de navegación, logo y enlaces principales en la parte superior de tu sitio.</p>
-          </div>
-          <div class="glass p-4 rounded-xl text-left">
-            <h3 class="font-bold text-cyan-300 mb-2">2. Hero</h3>
-            <p class="text-white/60 text-sm">La sección principal con título destacado, llamado a la acción y imagen representativa de tu negocio.</p>
-          </div>
-          <div class="glass p-4 rounded-xl text-left">
-            <h3 class="font-bold text-cyan-300 mb-2">3. Servicios</h3>
-            <p class="text-white/60 text-sm">Descripción de tus servicios o productos con íconos y explicaciones breves.</p>
-          </div>
-          <div class="glass p-4 rounded-xl text-left">
-            <h3 class="font-bold text-cyan-300 mb-2">4. Nosotros</h3>
-            <p class="text-white/60 text-sm">Historia de tu negocio, valores y qué te diferencia de la competencia.</p>
-          </div>
-          <div class="glass p-4 rounded-xl text-left">
-            <h3 class="font-bold text-cyan-300 mb-2">5. Galería</h3>
-            <p class="text-white/60 text-sm">Imágenes de tus trabajos, productos o realizados anteriores para mostrar calidad.</p>
-          </div>
-          <div class="glass p-4 rounded-xl text-left">
-            <h3 class="font-bold text-cyan-300 mb-2">6. Contacto</h3>
-            <p class="text-white/60 text-sm">Formulario de reserva, ubicación, teléfono y redes sociales para contactarte.</p>
-          </div>
-        </div>
-        <button id="startOnboarding" type="button" class="btn btn-primary mt-8 w-full">Comenzar onboarding</button>
+      <div>
+        <label class="small fw-semibold mb-1">Degradado botones (inicio)</label>
+        <input type="color" id="colorBotonesGradInicio" class="neu-input" style="width:80px;height:40px;padding:2px;cursor:pointer" value="#3b3409">
       </div>
-    </section>
-  </main>
-
-  <!-- PIE DE PÁGINA -->
-  <footer class="glass rounded-none border-x-0 border-b-0 text-center text-sm text-white/60 py-6 flex flex-col items-center gap-3 mt-auto">
-    <img src="logo-blanco.png" alt="Logo Creaweb Chach" class="h-10 w-auto opacity-80">
-    <span>© <span id="year">2026</span> Creaweb Chach App · Todos los derechos reservados</span>
-  </footer>
-
-  <!-- MODAL DE CONTACTO -->
-  <div id="modal" class="hidden fixed inset-0 z-40 grid place-items-center p-4 bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <form id="form" class="glass rounded-2xl w-full max-w-md bg-slate-900/80 overflow-hidden shadow-2xl">
-      <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between">
-        <h3 id="modal-title" class="text-xl font-bold">Cuéntanos tu rubro</h3>
-        <button type="button" id="closeModal" class="text-white/70 hover:text-white p-1 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Cerrar modal">
-          <i data-i="x"></i>
-        </button>
+      <div>
+        <label class="small fw-semibold mb-1">Degradado botones (fin)</label>
+        <input type="color" id="colorBotonesGradFin" class="neu-input" style="width:80px;height:40px;padding:2px;cursor:pointer" value="#3b3409">
       </div>
-
-      <div class="p-6 space-y-3">
-        <p class="text-sm text-white/70">Te avisaremos cuando tengamos plantillas disponibles para ti.</p>
-        <input type="hidden" name="_subject" value="Nuevo rubro solicitado - Creaweb Chach App">
-        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none">
-        
-        <div>
-          <label for="input-nombre" class="sr-only">Tu nombre</label>
-          <input id="input-nombre" name="nombre" required placeholder="Tu nombre" class="form-control">
-        </div>
-        <div>
-          <label for="input-email" class="sr-only">Tu correo electrónico</label>
-          <input id="input-email" type="email" name="email" required placeholder="Tu correo electrónico" class="form-control">
-        </div>
-        <div>
-          <label for="input-whatsapp" class="sr-only">WhatsApp (opcional)</label>
-          <input id="input-whatsapp" type="tel" name="whatsapp" placeholder="WhatsApp (opcional)" class="form-control">
-        </div>
-        <div>
-          <label for="input-rubro" class="sr-only">Rubro o tipo de empresa</label>
-          <input id="input-rubro" name="rubro" required placeholder="¿Cuál es tu rubro o tipo de empresa?" class="form-control">
-        </div>
-        <div>
-          <label for="input-mensaje" class="sr-only">Mensaje (opcional)</label>
-          <textarea id="input-mensaje" name="mensaje" rows="3" placeholder="Mensaje adicional (opcional)" class="form-control"></textarea>
-        </div>
-
-        <p id="formError" class="hidden text-sm text-red-300 bg-red-950/40 border border-red-500/30 rounded-lg p-2.5" role="alert"></p>
+      <div>
+        <label class="small fw-semibold mb-1">Dirección degradado</label>
+        <select id="dirBotonesGrad" class="neu-input" style="width:130px;padding:.4rem .6rem;font-size:.85rem">
+          <option value="to right">→ Horizontal</option>
+          <option value="to bottom">↓ Vertical</option>
+          <option value="to bottom right">↘ Diagonal</option>
+          <option value="to top right">↗ Diagonal inv.</option>
+        </select>
       </div>
-
-      <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2">
-        <button type="button" id="cancelModal" class="btn btn-outline">Cancelar</button>
-        <button type="submit" id="submitBtn" class="btn btn-primary">Enviar</button>
+    </div>
+    <button id="btnToggleAcciones" class="neu-btn" type="button" data-bs-toggle="collapse" data-bs-target="#editorActions" aria-expanded="true" aria-controls="editorActions" style="padding:.4rem .8rem;font-size:.85rem">☰ Herramientas</button>
+    <div id="editorActions" class="collapse show mt-2">
+      <div class="d-flex gap-2 flex-wrap editor-actions">
+        <button id="btnUndo" class="neu-btn" style="padding:.4rem .8rem;font-size:.85rem" title="Deshacer (Ctrl+Z)">↩ Deshacer</button>
+        <button id="btnRedo" class="neu-btn" style="padding:.4rem .8rem;font-size:.85rem" title="Rehacer (Ctrl+Y)">↪ Rehacer</button>
       </div>
-    </form>
-  </div>
-
-  <!-- MODAL DE VISTA PREVIA INTERACTIVA (PREVIEW MODAL) -->
-  <div id="previewModal" class="hidden fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
-    <div class="glass w-full h-full flex flex-col flex-1 overflow-hidden bg-slate-950/95">
-      
-      <!-- ÁREA DE CONTENIDO PREVIEW (IFRAME & LOADER) -->
-      <div class="relative flex-1 bg-slate-950/90 overflow-hidden flex items-center justify-center">
-        
-        <!-- Indicador de Carga -->
-        <div id="previewLoader" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/85 backdrop-blur-sm gap-3 text-sm text-cyan-200">
-          <div class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-400 rounded-full animate-spin"></div>
-          <span class="font-medium animate-pulse">Cargando vista previa interactiva...</span>
-        </div>
-
-        <!-- Contenedor del Frame (Ajustable dinámicamente) -->
-        <div id="previewFrameContainer" class="w-full h-full transition-all duration-300 ease-out flex flex-col bg-slate-900 overflow-hidden relative">
-          <iframe id="previewIframe" src="about:blank" class="w-full h-full border-0 bg-white" title="Vista previa de plantilla" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
-        </div>
-
+    </div>
+    <div class="vista-toggles mt-3">
+      <button id="btnDesktop" class="neu-btn active">🖥️ Ordenador</button>
+      <button id="btnMobile" class="neu-btn">📱 Móvil</button>
+    </div>
+    <div id="socialBox" class="mt-3" style="display:none">
+      <div class="small fw-semibold mb-2">Redes sociales de la plantilla</div>
+      <div id="socialList"></div>
+      <div class="mt-3">
+        <button id="btnAgregarSocial" class="neu-btn" style="padding:.4rem .8rem;font-size:.85rem">+ Agregar red social</button>
       </div>
-
     </div>
   </div>
+  <iframe id="frame" title="Plantilla en edición"></iframe>
+</section>
 
-  <!-- TOAST / NOTIFICACIONES -->
-  <aside id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass rounded-xl px-5 py-3 text-sm bg-slate-900/90 items-center gap-2 border border-white/20 shadow-xl" role="status" aria-live="polite"></aside>
+<!-- ============ BARRA INFERIOR ============ -->
+<nav class="bottombar">
+  <div class="container d-flex flex-wrap justify-content-center justify-content-md-between gap-2">
+    <a id="btnRegresar" class="neu-btn" href="/">← Regresar a CreaWeb</a>
+  </div>
+</nav>
 
-  <!-- SCRIPTS MODULARES (SOLID & SRP) -->
-  <script src="js/config/constants.js" defer></script>
-  <script src="js/data/rubros.data.js" defer></script>
-  <script src="js/icons/icon-registry.js" defer></script>
-  <script src="js/services/url.service.js" defer></script>
-  <script src="js/services/notification.service.js" defer></script>
-  <script src="js/services/catalog.service.js" defer></script>
-  <script src="js/services/form.service.js" defer></script>
-  <script src="js/components/catalog.view.js" defer></script>
-  <script src="js/components/modal.controller.js" defer></script>
-  <script src="js/components/preview-modal.controller.js" defer></script>
-  <script src="js/components/navigation.controller.js" defer></script>
-  <script src="js/app.js" defer></script>
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<!-- ============ MODAL VISTA PREVIA ============ -->
+<div class="modal fade" id="modalVista" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content p-2">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="vistaTitulo">Vista previa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body p-2">
+        <iframe id="vistaFrame" style="width:100%;height:70vh;border:0;border-radius:12px;background:#fff"></iframe>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="neu-btn" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" id="btnVistaUsar" class="neu-btn primary">Usar esta plantilla</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL AGREGAR RED SOCIAL ============ -->
+<div class="modal fade" id="modalSocial" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-2">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Agregar red social</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <label class="small fw-semibold mb-1">Selecciona la red social</label>
+        <select id="selSocial" class="neu-input mb-3">
+          <option value="facebook">Facebook</option>
+          <option value="instagram">Instagram</option>
+          <option value="tiktok">TikTok</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="twitter">X / Twitter</option>
+          <option value="youtube">YouTube</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="telegram">Telegram</option>
+        </select>
+        <label class="small fw-semibold mb-1">Enlace (URL)</label>
+        <input type="url" id="inputSocialUrl" class="neu-input mb-3" placeholder="https://facebook.com/tu-negocio">
+        <div id="socialErr" class="small text-danger" style="display:none"></div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="neu-btn" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnGuardarSocial" class="neu-btn primary">Agregar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL PUBLICAR ============ -->
+<div class="modal fade" id="modalPublicar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-2">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">Publicar web</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <form id="formPublicar" action="https://formspree.io/f/xrengvqb" method="POST">
+        <div class="modal-body">
+          <div id="pubOk" class="neu-in p-3 text-center" style="display:none">
+            <div class="fs-1">✅</div>
+            <p class="fw-semibold mb-1">¡Solicitud enviada!</p>
+            <p class="small opacity-75 mb-0" id="pubOkTxt">Recibimos tu información y tu HTML final. Te contactaremos pronto.</p>
+          </div>
+          <div id="pubCampos">
+            <div class="neu-in p-3 mb-3 small">
+              <b>¿Qué pasa al enviar?</b><br>
+              Nos llega el <b>HTML final</b> que personalizaste (textos, imágenes y redes) junto con tus datos. Nosotros lo subimos por ti, solo completa este formulario.
+            </div>
+            <label class="small fw-semibold mb-1" for="fResumen">Resumen / Descripción</label>
+            <textarea class="neu-input mb-3" id="fResumen" name="resumen" rows="3" placeholder="Breve descripción de tu web (opcional)" data-fs-field></textarea>
+            <input type="hidden" name="plantilla" id="fPlantilla">
+            <input type="hidden" name="html_final" id="fHtmlFinal">
+            <input type="hidden" name="subdominio_completo" id="fSubCompleto">
+            <input type="hidden" name="plantilla_origen" id="fPlantillaOrigen">
+            <input type="hidden" name="fecha" id="fFecha">
+            <input type="hidden" name="tamano_html_kb" id="fTamano">
+            <input type="hidden" name="_subject" id="fSubject">
+            <label class="small fw-semibold mb-1" for="fSub">Personaliza tu subdominio</label>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <input class="neu-input" id="fSub" name="subdominio" placeholder="ejemplo" required minlength="3" maxlength="30" pattern="[a-z0-9]+(-[a-z0-9]+)*" autocomplete="off" inputmode="url" data-fs-field>
+              <span class="small fw-semibold text-nowrap">.</span>
+              <select class="neu-input" id="fDominio" name="dominio" style="width:auto;padding:.4rem .8rem">
+              </select>
+            </div>
+            <div class="small opacity-75 mb-3">Tu web quedará en: <b id="subVista">ejemplo.empresagt.com</b><br>Solo letras minúsculas, números y guiones (3 a 30 caracteres).</div>
+            <label class="small fw-semibold mb-1" for="fNegocio">Nombre de tu negocio o proyecto</label>
+            <input class="neu-input mb-3" id="fNegocio" name="negocio" required data-fs-field>
+            <label class="small fw-semibold mb-1" for="fNombre">Tu nombre</label>
+            <input class="neu-input mb-3" id="fNombre" name="nombre" required data-fs-field>
+            <label class="small fw-semibold mb-1" for="fEmail">Correo electrónico</label>
+            <input class="neu-input mb-3" type="email" id="fEmail" name="email" required data-fs-field>
+            <label class="small fw-semibold mb-1" for="fWhats">WhatsApp</label>
+            <input class="neu-input mb-3" type="tel" id="fWhats" name="whatsapp" required data-fs-field>
+            <label class="small fw-semibold mb-1" for="fMsg">Mensaje</label>
+            <textarea class="neu-input mb-2" rows="3" id="fMsg" name="mensaje" placeholder="Comentarios o indicaciones extra (opcional)" data-fs-field></textarea>
+            <div id="pubErr" class="small text-danger" style="display:none"></div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="neu-btn" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" id="btnEnviar" class="neu-btn primary" data-fs-submit-btn>Enviar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Aviso -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2000">
+  <div id="toast" class="toast neu border-0" role="status"><div class="toast-body fw-semibold" id="toastMsg"></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -1,9 +1,9 @@
 :root {
-  --bg: #f0f2f5;
-  --sh1: #c8d0d8;
-  --sh2: #ffffff;
-  --tx: #000000;
-  --ac: #4f6df5
+  --bg: #d4dbdfda;
+  --sh1: #1e4f7d;
+  --sh2: #e7e7ed;
+  --tx: #080808;
+  --ac: #3b3409;
 }
 
 html, body {
@@ -177,6 +177,41 @@ body {
   transition: width .3s;
 }
 
+/* Editor a pantalla completa (solo queda visible el menú inferior) */
+#editor.editor-full {
+  min-height: calc(100vh - 96px);
+  height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+}
+
+#editor.editor-full .container-fluid,
+#editor.editor-full .container {
+  padding: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+#editor.editor-full > .neu {
+  flex-shrink: 0;
+  padding: 1rem;
+  margin: 0;
+  border-radius: 0;
+  width: 100%;
+}
+
+#editor.editor-full iframe {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  border-radius: 0;
+  margin: 0;
+  width: 100%;
+  pointer-events: auto;
+}
+
 #editor iframe.mobile {
   width: 375px;
   max-width: 100%;
@@ -233,4 +268,66 @@ body {
 [data-cw-social] svg {
   width: 100%;
   height: 100%;
+}
+/* Cohesión visual: contraste automático claro/oscuro - DESACTIVADO para consistencia */
+:root { color-scheme: light; }
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1d23;
+    --sh1: #0f1115;
+    --sh2: #2a2f3a;
+    --tx: #f0f2f5;
+    --ac: #7b93ff;
+  }
+} */
+.bg-dark { background: #1a1d23 !important; color: #f0f2f5 !important; }
+.bg-light { background: #f0f2f5 !important; color: #1a1d23 !important; }
+.text-on-dark { color: #f0f2f5 !important; }
+.text-on-light { color: #1a1d23 !important; }
+/* Barra flotante de acciones del elemento seleccionado */
+.cw-toolbar {
+  position: absolute;
+  z-index: 9999;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: rgba(255,255,255,.95);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  align-items: center;
+}
+.cw-toolbar-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+.cw-toolbar-btn:hover { background: rgba(79,109,245,.15); }
+.cw-color-pop {
+  display: none;
+  gap: 8px;
+  align-items: center;
+  margin-left: 6px;
+}
+.cw-color-pop label { font-size: .75rem; font-weight: 600; }
+.cw-color-pop input[type="color"] { width: 36px; height: 28px; border: 0; padding: 0; cursor: pointer; }
+
+
+/* Botones superiores del editor más definidos */
+.editor-actions {
+  align-items: center;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+.editor-actions .neu-btn {
+  border: 2px solid var(--sh1);
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+.editor-actions .neu-btn.primary {
+  background: var(--ac);
+  color: #fff;
 }
