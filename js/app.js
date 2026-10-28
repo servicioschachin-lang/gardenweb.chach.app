@@ -1,160 +1,262 @@
-/* Aplicación principal - Orquestador */
-import { CONFIG } from './config.js';
-import { $ } from './utils.js';
-import { Gallery } from './gallery.js';
-import { Editor } from './editor.js';
-import { FormHandler } from './form-handler.js';
+/**
+ * Aplicación Principal - Bootstrap y Orquestador de Dependencias
+ * Principios SOLID aplicados:
+ *  - SRP: Responsabilidad exclusiva sobre la inicialización, inyección de dependencias y enlace de eventos generales.
+ *  - OCP: Las funcionalidades y vistas se extienden mediante componentes modulares sin alterar el núcleo.
+ *  - LSP: Servicios de notificación y formularios cumplen interfaces intercambiables.
+ *  - ISP: Componentes reciben únicamente las dependencias y opciones que requieren.
+ *  - DIP: La aplicación orquesta módulos abstractos desacoplados del DOM estático.
+ */
+(function (root) {
+  'use strict';
 
-class App {
-  constructor() {
-    this.gallery = null;
-    this.editor = null;
-    this.formHandler = null;
-    this.toast = null;
-    this.modalPublish = null;
-    this.modalPreview = null;
-  }
+  const {
+    CONFIG,
+    RUBROS_DATA,
+    IconRegistry,
+    UrlService,
+    NotificationService,
+    CatalogService,
+    FormService,
+    CatalogView,
+    ModalController,
+    PreviewModalController,
+    NavigationController
+  } = root.Creaweb || {};
 
-  init() {
-    this.setupUI();
-    this.setupComponents();
-    this.setupEventListeners();
-    this.loadSavedState();
-  }
+  class App {
+    constructor() {
+      this.services = {};
+      this.components = {};
+    }
 
-  setupUI() {
-    document.getElementById('btnRegresar').href = CONFIG.CREAWEB_URL;
-  }
+    init() {
+      // 1. Renderizar iconos SVG declarativos iniciales
+      IconRegistry.paint();
 
-  setupComponents() {
-    this.toast = new bootstrap.Toast($('#toast'), { delay: 3500 });
-    this.modalPublish = new bootstrap.Modal($('#modalPublicar'));
-    this.modalPreview = new bootstrap.Modal($('#modalVista'));
+      // 2. Inicializar servicios del sistema (DIP / SRP)
+      const toastEl = document.getElementById('toast');
+      this.services.notification = new NotificationService(toastEl, CONFIG.toastDuration);
+      this.services.catalog = new CatalogService(RUBROS_DATA);
+      this.services.form = new FormService(CONFIG.links.formEndpoint);
 
-    this.editor = new Editor();
-    this.formHandler = new FormHandler(this.editor);
-    this.formHandler.setModal(this.modalPublish);
+      // 3. (Rubros/plantillas eliminados: la app se comunica solo por enlaces)
 
-    this.gallery = new Gallery(
-      (template) => this.useTemplate(template),
-      (template) => this.previewTemplate(template)
-    );
-  }
+      // 4. Inicializar controlador del modal de vista previa interactiva (SRP / DIP)
+      if (PreviewModalController) {
+        this.components.previewModal = new PreviewModalController({
+          modalElement: document.getElementById('previewModal'),
+          frameContainer: document.getElementById('previewFrameContainer'),
+          iframeElement: document.getElementById('previewIframe'),
+          loaderElement: document.getElementById('previewLoader'),
+          titleElement: document.getElementById('previewTitle'),
+          urlElement: document.getElementById('previewUrl'),
+          deviceDesktopBtn: document.getElementById('deviceDesktop'),
+          deviceTabletBtn: document.getElementById('deviceTablet'),
+          deviceMobileBtn: document.getElementById('deviceMobile'),
+          chooseBtn: document.getElementById('previewChoose'),
+          reloadBtn: document.getElementById('previewReload'),
+          closeButtons: [
+            document.getElementById('closePreviewModal')
+          ],
+          urlService: UrlService,
+          notificationService: this.services.notification,
+          onChoose: (rubro) => this.handleRubroSelect(rubro)
+        });
+      }
 
-  setupEventListeners() {
-    $('#frame').addEventListener('load', () => this.editor.onFrameLoad());
+      // 4. Inicializar controlador de navegación (SRP)
+      this.components.navigation = new NavigationController({
+        step1Element: document.getElementById('step1'),
+        step2Element: document.getElementById('step2'),
+        mobileMenuElement: document.getElementById('mobileMenu'),
+        burgerButton: document.getElementById('burger'),
+        burgerOpenIcon: document.getElementById('burgerOpen'),
+        burgerCloseIcon: document.getElementById('burgerClose'),
+        onStepChange: (step) => {
+          if (step === 2) {
+            this.updateCatalogDisplay(searchInput ? searchInput.value : '');
+          }
+        }
+      });
 
-    $('#btnGuardar').addEventListener('click', () => {
-      if (!this.editor.getEstado()) return;
-      const saved = this.editor.saveToStorage();
-      if (saved) {
-        this.showNotification('Cambios guardados');
+      // 5. Inicializar controlador del modal de contacto (SRP / DIP)
+      this.components.modal = new ModalController({
+        modalElement: document.getElementById('modal'),
+        formElement: document.getElementById('form'),
+        submitButton: document.getElementById('submitBtn'),
+        errorElement: document.getElementById('formError'),
+        formService: this.services.form,
+        notificationService: this.services.notification,
+        endpointUrl: CONFIG.links.formEndpoint
+      });
+
+      // 6. Enlazar eventos de interacción
+      this.bindInteractions();
+
+      // 7. (Sin catálogo de rubros: nada que renderizar)
+    }
+
+    /**
+     * Maneja la selección de un rubro/plantilla
+     * Resuelve de forma definitiva la redirección a dominios externos
+     * evitando la ruta relativa indeseada (ej: creaweb.chach.app/barberweb.chach.app)
+     * @param {Object} rubro
+     */
+    handleRubroSelect(rubro) {
+      if (!rubro || !rubro.url || !rubro.url.trim()) {
+        this.services.notification.show('Estamos trabajando en ello, próximamente disponible');
+        return;
+      }
+
+      // UrlService normaliza el dominio a 'https://dominio...' garantizando redirección absoluta correcta
+      UrlService.navigate(rubro.url);
+    }
+
+    /**
+     * Abre la vista previa interactiva del sitio de la plantilla antes de elegir
+     * @param {Object} rubro
+     */
+    handleRubroPreview(rubro) {
+      if (!rubro || !rubro.url || !rubro.url.trim()) {
+        this.services.notification.show('Estamos trabajando en ello, próximamente disponible');
+        return;
+      }
+
+      if (this.components.previewModal) {
+        this.components.previewModal.open(rubro);
       } else {
-        this.showNotification('No se pudo guardar: las imágenes son muy pesadas');
+        // Fallback si por alguna razón el modal no está disponible
+        UrlService.navigate(rubro.url);
       }
-    });
-
-    $('#btnCambiar').addEventListener('click', () => {
-      if (!this.editor.getEstado()) return;
-      if (!confirm('Al cambiar de plantilla se pierden los cambios de la actual. ¿Continuar?')) return;
-      try {
-        localStorage.removeItem(CONFIG.STORE_KEY);
-      } catch (e) {}
-      this.editor.clear();
-      this.gallery.hideContinueBox();
-    });
-
-    $('#btnRegresarGaleria').addEventListener('click', () => {
-      if (!this.editor.getEstado()) return;
-      this.editor.close();
-      this.gallery.show();
-      this.updateContinueBox();
-    });
-
-    $('#btnContinuar').addEventListener('click', () => {
-      this.continueEditing();
-    });
-
-    $('#btnEmpezarNuevo').addEventListener('click', () => {
-      if (confirm('¿Estás seguro? Se perderán todos los cambios guardados.')) {
-        try {
-          localStorage.removeItem(CONFIG.STORE_KEY);
-        } catch (e) {}
-        this.gallery.hideContinueBox();
-        this.showNotification('Progreso eliminado');
-      }
-    });
-  }
-
-  async useTemplate(template) {
-    const success = await this.editor.loadTemplate(template);
-    if (!success) {
-      this.showNotification('No se pudo cargar la plantilla. Revisa tu conexión.');
     }
-  }
 
-  async previewTemplate(template) {
-    try {
-      const r = await fetch(template.url);
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const html = await r.text();
-      const base = new URL(template.url, location.href).href;
-      $('#vistaTitulo').textContent = template.nombre;
-      $('#vistaFrame').srcdoc = this.addBaseToHtml(html, base);
-      $('#btnVistaUsar').onclick = () => {
-        this.modalPreview.hide();
-        this.useTemplate(template);
+    /**
+     * Actualiza la lista de plantillas mostrada según el término de búsqueda
+     * @param {string} query
+     */
+    updateCatalogDisplay(query = '') {
+      const filtered = this.services.catalog.filter(query);
+      this.components.catalogView.render(filtered);
+      
+      // Actualizar contador de rubros dinámicamente
+      const totalRubros = this.services.catalog.getAll().length;
+      const rubrosCountEl = document.getElementById('rubros-count');
+      if (rubrosCountEl) {
+        rubrosCountEl.textContent = totalRubros;
+      }
+      
+      // Actualizar total de plantillas en despliegues aislados
+      const totalPlantillas = this.services.catalog.getTotalPlantillasCount();
+      const plantillasCountEl = document.getElementById('plantillas-count');
+      if (plantillasCountEl) {
+        plantillasCountEl.textContent = totalPlantillas;
+      }
+    }
+
+    /**
+     * Enlaza los botones y acciones principales de la UI
+     */
+    bindInteractions() {
+      const nav = this.components.navigation;
+      const modal = this.components.modal;
+
+      // Navegación a Plantillas (Paso 2)
+      const btnTpl = document.getElementById('btnTpl');
+      const navTpl = document.getElementById('navTpl');
+      const mTpl = document.getElementById('mTpl');
+
+      if (btnTpl) btnTpl.addEventListener('click', () => {
+         if (CONFIG.links.templates && CONFIG.links.templates.trim()) {
+           this.handleRubroPreview({ n: 'Elegir plantilla', url: CONFIG.links.templates });
+         } else {
+           this.services.notification.show('Estamos trabajando en ello, próximamente disponible');
+         }
+       });
+      if (navTpl) navTpl.addEventListener('click', (e) => { e.preventDefault(); nav.goToStep(2); });
+      if (mTpl) mTpl.addEventListener('click', (e) => { e.preventDefault(); nav.goToStep(2); });
+
+      // Navegación a Inicio (Paso 1)
+      const navHome = document.getElementById('navHome');
+      const crumbHome = document.getElementById('crumbHome');
+      const brand = document.getElementById('brand');
+      const mHome = document.getElementById('mHome');
+
+      const goToHome = (e) => {
+        if (e) e.preventDefault();
+        nav.goToStep(1);
       };
-      this.modalPreview.show();
-    } catch (err) {
-      this.showNotification('No se pudo cargar la plantilla. Revisa tu conexión.');
-      console.error(err);
+
+      if (navHome) navHome.addEventListener('click', goToHome);
+      if (crumbHome) crumbHome.addEventListener('click', goToHome);
+      if (brand) brand.addEventListener('click', goToHome);
+      if (mHome) mHome.addEventListener('click', goToHome);
+
+      // Opción: "Crear diseño propio desde 0"
+      const btnScratch = document.getElementById('btnScratch');
+      if (btnScratch) {
+        btnScratch.addEventListener('click', () => {
+          if (CONFIG.links.scratch && CONFIG.links.scratch.trim()) {
+            // Abrir vista previa interactiva (igual que en plantillas) antes de ir al sitio
+            this.handleRubroPreview({ n: 'Crear diseño propio desde 0', url: CONFIG.links.scratch });
+          } else {
+            this.services.notification.show('Estamos trabajando en ello, próximamente disponible');
+          }
+        });
+      }
+
+      // Búsqueda con debounce (evita disparar en cada tecla)
+      const searchInput = document.getElementById('search');
+      if (searchInput) {
+        let searchTimer = null;
+        searchInput.addEventListener('input', (e) => {
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(() => {
+            this.updateCatalogDisplay(e.target.value);
+          }, 150);
+        });
+      }
+
+      // Abrir modal de contacto
+      const navContact = document.getElementById('navContact');
+      const mContact = document.getElementById('mContact');
+      const btnMissing = document.getElementById('btnMissing');
+
+      const openContactModal = (e) => {
+        if (e) e.preventDefault();
+        nav.setMobileMenu(false);
+        modal.open();
+      };
+
+      if (navContact) navContact.addEventListener('click', openContactModal);
+      if (mContact) mContact.addEventListener('click', openContactModal);
+      if (btnMissing) btnMissing.addEventListener('click', openContactModal);
+
+      // Botones de cierre del modal
+      const closeModal = document.getElementById('closeModal');
+      const cancelModal = document.getElementById('cancelModal');
+
+      if (closeModal) closeModal.addEventListener('click', () => modal.close());
+      if (cancelModal) cancelModal.addEventListener('click', () => modal.close());
     }
   }
 
-  addBaseToHtml(html, base) {
-    const tag = `<base href="${base}" data-cw="1">`;
-    return /<head[^>]*>/i.test(html)
-      ? html.replace(/<head[^>]*>/i, m => m + tag)
-      : tag + html;
+  root.Creaweb.App = App;
+
+  // Inicializar al cargar el DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      const app = new App();
+      app.init();
+      root.Creaweb.appInstance = app;
+    });
+  } else {
+    const app = new App();
+    app.init();
+    root.Creaweb.appInstance = app;
   }
 
-  loadSavedState() {
-    try {
-      const g = JSON.parse(localStorage.getItem(CONFIG.STORE_KEY) || 'null');
-      if (g && g.html) {
-        this.gallery.showContinueBox(g.nombre);
-      }
-    } catch (e) {}
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = App;
   }
-
-  continueEditing() {
-    try {
-      const g = JSON.parse(localStorage.getItem(CONFIG.STORE_KEY) || 'null');
-      if (g && g.html) {
-        this.editor.loadFromStorage(g);
-        $('#edEstado').textContent = 'Cambios restaurados';
-        this.gallery.hideContinueBox();
-      }
-    } catch (e) {}
-  }
-
-  updateContinueBox() {
-    try {
-      const g = JSON.parse(localStorage.getItem(CONFIG.STORE_KEY) || 'null');
-      if (g && g.html) {
-        this.gallery.showContinueBox(g.nombre);
-      }
-    } catch (e) {}
-  }
-
-  showNotification(message) {
-    $('#toastMsg').textContent = message;
-    this.toast.show();
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const app = new App();
-  app.init();
-});
+})(typeof globalThis !== 'undefined' ? globalThis : window);
