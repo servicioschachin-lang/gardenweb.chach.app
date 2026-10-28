@@ -1,7 +1,7 @@
 /* Configuración de la aplicación */
 export const CONFIG = {
   CREAWEB_URL: 'https://web.chach.app',
-  FORMSPREE: 'https://formspree.io/f/xrengvqb',
+  FORMSPREE: 'https://formspree.io/f/xqppqrpl',
   DOMINIOS: ['empresagt.com', 'chach.app', 'chachin.dev'],
   DOMINIO_DEFAULT: 'empresagt.com',
   LIMITE_HTML: 900000,
