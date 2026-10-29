@@ -1,4 +1,6 @@
 /* Imágenes: cambio de etiqueta <img> y fondo CSS */
+import { $ } from './utils.js';
+
 export function applyImageEditing(editor) {
   editor.changeImage = function(img) {
     const inp = document.createElement('input');
