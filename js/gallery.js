@@ -25,7 +25,7 @@ export class Gallery {
 
     $('#grid').innerHTML = lista.map((t, i) => {
       const ok = !!t.url;
-      return `<div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      return `<div class="col-12 col-sm-6 col-lg-4">
         <article class="neu h-100 d-flex flex-column pb-3">
           <div class="preview neu-in">
             ${ok

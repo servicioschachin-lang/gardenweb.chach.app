@@ -127,72 +127,34 @@ export class Editor {
   }
   getHTML() {
     const doc = $('#frame').contentDocument;
-    if (!doc) return this.estado.html;
-    const clon = doc.documentElement.cloneNode(true);
-    clon.querySelectorAll('[data-cw]').forEach(n => n.remove());
-    clon.querySelectorAll('[data-cw-edit]').forEach(n => {
+    if (!doc || !doc.body) return this.estado?.html || '';
+
+    // Clonamos solo el body editado (textos, imágenes, colores inline)
+    const bodyClone = doc.body.cloneNode(true);
+    bodyClone.querySelectorAll('[data-cw]').forEach(n => n.remove());
+    bodyClone.querySelectorAll('[data-cw-edit]').forEach(n => {
       n.removeAttribute('contenteditable');
       n.removeAttribute('data-cw-edit');
       n.removeAttribute('spellcheck');
     });
-    clon.querySelectorAll('[data-cw-img]').forEach(n => n.removeAttribute('data-cw-img'));
-    clon.querySelectorAll('[data-cw-social]').forEach(n => n.removeAttribute('data-cw-social'));
-    const fondo = $('#colorFondo').value;
-    const texto = $('#colorTexto').value;
-    const fuenteBody = $('#fuenteBody') ? $('#fuenteBody').value : '';
-    if (fondo !== '#ffffff' || texto !== '#000000' || (fuenteBody && fuenteBody !== 'system-ui')) {
-      const st = clon.querySelector('style[data-cw-body]') || clon.querySelector('style') || clon.head.appendChild(clon.createElement('style'));
-      st.setAttribute('data-cw-body', '1');
-      let css = `body{background-color:${fondo}!important;color:${texto}!important`;
-      if (fuenteBody && fuenteBody !== 'system-ui') {
-        css += `;font-family:${fuenteBody}!important`;
-      }
-      css += '}';
-      st.textContent = (st.textContent || '') + css;
+    bodyClone.querySelectorAll('*').forEach(n => {
+      [...n.attributes].forEach(attr => {
+        if (attr.name.startsWith('data-cw')) n.removeAttribute(attr.name);
+      });
+    });
+
+    const original = this.estado?.html || '';
+    const doctype = (original.match(/<!DOCTYPE[^>]*>/i) || ['<!DOCTYPE html>'])[0];
+    const htmlOpen = (original.match(/<html[^>]*>/i) || ['<html lang="es">'])[0];
+    let head = '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>';
+    const headMatch = original.match(/<head[^>]*>[\s\S]*?<\/head>/i);
+    if (headMatch) {
+      head = headMatch[0].replace(/<base[^>]*>/gi, '');
     }
-    clon.querySelectorAll('[data-cw-bg]').forEach(el => {
-      const bg = el.getAttribute('data-cw-bg');
-      el.style.setProperty('background-image', 'none', 'important');
-      el.style.setProperty('background-color', bg, 'important');
-      el.removeAttribute('data-cw-bg');
-    });
-    clon.querySelectorAll('[data-cw-color]').forEach(el => {
-      const col = el.getAttribute('data-cw-color');
-      el.style.color = col;
-      el.removeAttribute('data-cw-color');
-    });
-    clon.querySelectorAll('[data-cw-btn-bg]').forEach(el => {
-      const bg = el.getAttribute('data-cw-btn-bg');
-      el.style.setProperty('background-image', 'none', 'important');
-      el.style.setProperty('background-color', bg, 'important');
-      el.removeAttribute('data-cw-btn-bg');
-    });
-    clon.querySelectorAll('[data-cw-btn-text]').forEach(el => {
-      const col = el.getAttribute('data-cw-btn-text');
-      el.style.setProperty('color', col, 'important');
-      el.removeAttribute('data-cw-btn-text');
-    });
-    clon.querySelectorAll('[data-cw-font]').forEach(el => {
-      const fm = el.getAttribute('data-cw-font');
-      el.style.fontFamily = fm;
-      el.removeAttribute('data-cw-font');
-    });
-    clon.querySelectorAll('[data-cw-btn-grad]').forEach(el => {
-      const dir = el.getAttribute('data-cw-btn-grad-dir') || 'to right';
-      const inicio = el.getAttribute('data-cw-btn-grad-inicio');
-      const fin = el.getAttribute('data-cw-btn-grad-fin');
-      if (inicio && fin) {
-        el.style.setProperty('background-image', `linear-gradient(${dir}, ${inicio}, ${fin})`, 'important');
-        el.style.setProperty('background-color', inicio, 'important');
-      }
-      el.removeAttribute('data-cw-btn-grad');
-      el.removeAttribute('data-cw-btn-grad-dir');
-      el.removeAttribute('data-cw-btn-grad-inicio');
-      el.removeAttribute('data-cw-btn-grad-fin');
-    });
-    clon.querySelectorAll('[data-cw-social-name]').forEach(n => n.removeAttribute('data-cw-social-name'));
-    return '<!DOCTYPE html>\n' + clon.outerHTML;
+
+    return doctype + '\n' + htmlOpen + '\n' + head + '\n' + bodyClone.outerHTML + '\n</html>';
   }
+
   saveToStorage() {
     if (!this.estado) return;
     this.estado.html = this.getHTML();
